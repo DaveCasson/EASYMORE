@@ -43,11 +43,11 @@ class easymore:
         self.remap_csv                 =  '' # name of the remapped file if provided
         self.author_name               =  '' # name of the authour
         self.license                   =  '' # data license
-        self.tolerance                 =  10**-5 # tolerance
+        self.tolerance                 =  10**-3 # tolerance
         self.save_csv                  =  False # save csv
         self.sort_ID                   =  False # to sort the remapped based on the target shapfile ID; self.target_shp_ID should be given
         self.complevel                 =  4 # netcdf compression level from 1 to 9. Any other value or object will mean no compression.
-        self.version                   =  '0.0.3' # version of the easymore
+        self.version                   =  '0.0.3 test2' # version of the easymore
         print('EASYMORE version '+self.version+ ' is initiated.')
 
     ##############################################################
@@ -120,15 +120,15 @@ class easymore:
             # reprojections to equal area
             if (str(shp_1.crs).lower() == str(shp_2.crs).lower()) and ('epsg:4326' in str(shp_1.crs).lower()):
                 shp_1 = shp_1.to_crs ("EPSG:6933") # project to equal area
-                shp_1.to_file(self.temp_dir+self.case_name+'test.shp')
-                shp_1 = gpd.read_file(self.temp_dir+self.case_name+'test.shp')
+                shp_1.to_file(self.temp_dir+self.case_name+'_test1.shp')
+                shp_1 = gpd.read_file(self.temp_dir+self.case_name+'_test1.shp')
                 shp_2 = shp_2.to_crs ("EPSG:6933") # project to equal area
-                shp_2.to_file(self.temp_dir+self.case_name+'test.shp')
-                shp_2 = gpd.read_file(self.temp_dir+self.case_name+'test.shp')
+                shp_2.to_file(self.temp_dir+self.case_name+'_test2.shp')
+                shp_2 = gpd.read_file(self.temp_dir+self.case_name+'_test2.shp')
                 # remove test files
-                removeThese = glob.glob(self.temp_dir+self.case_name+'test.*')
-                for file in removeThese:
-                    os.remove(file)
+                #removeThese = glob.glob(self.temp_dir+self.case_name+'test*.*')
+                #for file in removeThese:
+                #    os.remove(file)
             else:
                 sys.exit('The projection for source and target shapefile are not WGS84, please revise, assign')
             shp_int = self.intersection_shp(shp_1, shp_2)
@@ -1264,7 +1264,7 @@ to correct for lon above 180')
                 print('EASYMORE detects that shapefile longitude is between 0 and 360, correction is performed to transfer to -180 to 180')
                 # shapefile with -180 to -360 lon
                 gdf1 = {'geometry': [Polygon([( -360.0+self.tolerance, -90.0+self.tolerance), (-360.0+self.tolerance,  90.0-self.tolerance),\
-                                              ( -180.0+self.tolerance,  90.0-self.tolerance), (-180.0+self.tolerance, -90.0+self.tolerance)])]}
+                                              ( -180.0-self.tolerance,  90.0-self.tolerance), (-180.0-self.tolerance, -90.0+self.tolerance)])]}
                 gdf1 = gpd.GeoDataFrame(gdf1)
                 gdf1 = gdf1.set_crs ("epsg:4326")
                 warnings.simplefilter('ignore')
@@ -1320,6 +1320,8 @@ to correct for lon above 180')
         # check if the output has the same number of elements
         if len(shp) != len(shp_final):
             sys.exit('the element of input shapefile and corrected shapefile area not the same')
+        # explode the shapefile to turn multipolygone to polygone
+        # shp_final = shp_final.explode()
         # return the shapefile
         return shp_final
 
